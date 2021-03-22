@@ -48,20 +48,16 @@
 #############################################################################
 # to run this script separately, you have to uncomment the next 10 lines!
 # rm(list = ls())
-# if (.Platform$OS.type ==  "windows") {
-#   path <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-#   maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#   p.1 <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-#   p.1maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#
-#   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
+# if (.Platform$OS.type == "windows") {
+#   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
+#   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+#   
+#   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # } else {
-#   path <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-#   maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#   p.1 <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-#   p.1maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#
-#   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
+#   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+#   
+#   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # }
 # ############################################################################
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
@@ -99,14 +95,14 @@ for (year_i in run.year) {
   file.name.after <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i + 1, "_lv0.dat")
 
   # load manual filters ==> flag 2 system error, flag 6 plausibility and flag 7 Decreased accuracy
-  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/Ba_filter_", year_i, ".dat"),
+  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "filter.files/Ba_filter_", year_i, ".dat"),
                           sep = ",", dec = ".", header = T)
   db.filter <- db.filter[db.filter$dataset == station, ]
   db.filter[, 1] <- format(as.POSIXct(db.filter[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
   db.filter[, 2] <- format(as.POSIXct(db.filter[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
 
   # load maintenance filters flag 3
-  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/Ba_maintenance_", year_i, ".dat"),
+  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "maintenance.files/Ba_maintenance_", year_i, ".dat"),
                          sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
   db.maint$from <- format(as.POSIXct(db.maint$from, origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
@@ -403,9 +399,9 @@ for (year_i in run.year) {
 
   if (station %in% c("BaSoil1998", "BaSoil2009")) {
     # path.input: path for threshold table for calculation of volumetric water content (vwc)
-    path.input <- paste(path$w[path$n == "LV2.p"], "Bayelva/VWC/threshold_", station, "_", sep = "")
+    path.input <- paste(p.1$w[p.1$n == "settings.p"], "vwc.thresholds/threshold_", station, "_", sep = "")
     # tab.vwc_calc: table with column names of soil temperature (Ts), dielectricity (E2), porosity (phi) and vwc of the first year (theta_tot_prior) for the the calculation of vwc
-    tab.vwc_calc <- read.table(file = paste(path$w[path$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""),
+    tab.vwc_calc <- read.table(file = paste(p.1$w[p.1$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""),
                                header = TRUE, sep = ",", dec = ".", stringsAsFactors = FALSE)
     # mw.width: width of moving window to calculate vwc
     mw.width <- time.res
