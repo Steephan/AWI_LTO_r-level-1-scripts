@@ -5,9 +5,9 @@
 ##   filter and flags for each variable
 ##
 ##   written by:  stephan.lange@awi.de
-##                peter.schreiber@awi.de
+## 
 ##
-##   last modified: 2020-07-29
+##   last modified: 2021-03-25
 ##
 ##   last check: 2020-01-29
 ##   checked by: christian.lehr@awi.de
@@ -20,6 +20,7 @@
 #############################################################################
 ##
 ##  last modifications:
+##  2021-03-25 SL new git path
 ##  2020-10-30 CL implement new way of choosing station, years and run.year
 ##  2020-10-29 CL replaced t.year with year_i
 ##  2020-10-06 CL new condition: flag 5 is only applied for years before 2019
@@ -41,23 +42,25 @@
 ##
 #############################################################################
 # to run this script separately, you have to uncomment the next 10 lines!
-# rm(list = ls())
-# if (.Platform$OS.type == "windows") {
-#   path <- read.table("N:/sparc/LTO/R_database/database_R/settings/sa_path_windoof.txt", sep = "\t", header = T)
-#   maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/sa_maintance.txt", sep = "\t", header = T)
-#   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
-# } else {
-#   path <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-#   maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
-# }
+rm(list = ls())
+if (.Platform$OS.type == "windows") {
+  p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
+  p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+  
+  source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+} else {
+  p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+  p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+  
+  source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+}
 #############################################################################
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
-# require(zoo)
-# origin <- "1970-01-01"
-# recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-# station <- 'SaSoil2002'
-# run.year <- 2020
+require(zoo)
+origin <- "1970-01-01"
+recent.year <- as.numeric(format(Sys.Date(),"%Y"))
+station <- 'SaSnow2012'
+run.year <- 2012:2020
 ##############################################################################
 
 stations <- c('SaSoil1998', 'SaSoil2002', 'SaSoil2012', 'SaMet1998', 'SaMet2002',
@@ -78,7 +81,7 @@ years <- list.years[[which(stations == station)]]
 
 # please run "SaSnow2012" without peak detection
 # !!!no peak.detection for SaPond2014 -> gradient to low
-mit.peak.detection <- 1
+mit.peak.detection <- 0
 
 
 #####################
@@ -97,13 +100,13 @@ for (year_i in run.year) {
   file.name.after <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i + 1, "_lv0.dat")
 
   # load manual filters
-  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/Sa_filter_", year_i, ".dat"), sep = ",", dec = ".", header = T)
+  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "filter.files/Sa_filter_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.filter <- db.filter[db.filter$dataset == station, ]
   db.filter[, 1] <- format(as.POSIXct(db.filter[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
   db.filter[, 2] <- format(as.POSIXct(db.filter[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
 
   # load maintanance filters
-  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/Sa_maintenance_", year_i, ".dat"), sep = ",", dec = ".", header = T)
+  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "maintenance.files/Sa_maintenance_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
   db.maint[, 1] <- format(as.POSIXct(db.maint[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
   db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
@@ -279,12 +282,12 @@ for (year_i in run.year) {
   ## flag == 5    (Gradient)
   ##
 
-  if (run.year < 2019) {
+ # if (run.year < 2019) {
     if (mit.peak.detection == 1) {
       tmpflag <- detect.peaks(lv1.data, col.cat, station) # time.res,
       lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 5)
     }
-  }
+ # }
 
   ##==============================================================================
   ##
