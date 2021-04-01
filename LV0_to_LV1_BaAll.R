@@ -17,6 +17,7 @@
 #############################################################################
 ##
 ## last modification:
+## 2021-04-01 SL add new station BaHole2021, end of station BaHole2015
 ## 2020-10-29 CL replaced t.year with year_i
 ## 2020-10-06 CL new condition: flag 5 is only applied for years before 2019
 ## 2020-09-28 CL update index of flagging columns before reformatting "no flag" from 100 to 0
@@ -69,12 +70,12 @@
 ##############################################################################
 
 stations <- c('BaSoil1998', 'BaSoil2009', 'BaSoil2017', 'BaMet1998', 'BaMet2009',
-              'BaSnow2013', 'BaSnow2019sr','BaSnow2019cs', 'BaHole2009', 'BaHole2015', 'BaEddy2007')
+              'BaSnow2013', 'BaSnow2019sr','BaSnow2019cs', 'BaHole2009', 'BaHole2015','BaHole2021', 'BaEddy2007')
 # please update BaSnow2019sr before BaSnow2019cs because BaSnow2019cs
 # inherits "Dsn" from BaSnow2019sr (see RAW_to_LV0_BaSnow2019.R)
 # consequently, the Dsn_flag is likewise inherited
 list.years <- list(1998:2012, 2009:recent.year, 2017:recent.year, 1998:2012, 2009:recent.year,
-              2013:recent.year, 2019:recent.year, 2019:recent.year, 2009:recent.year, 2015:recent.year, 2007:2017)
+              2013:recent.year, 2019:recent.year, 2019:recent.year, 2009:recent.year, 2015:2021, 2021:recent.year, 2007:2017)
 
 years <- list.years[[which(stations == station)]]
 
