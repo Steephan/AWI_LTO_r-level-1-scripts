@@ -52,12 +52,12 @@
 # if (.Platform$OS.type == "windows") {
 #   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
 #   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-#   
+# 
 #   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # } else {
 #   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
 #   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-#   
+# 
 #   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # }
 # ############################################################################
@@ -66,7 +66,7 @@
 # origin <- "1970-01-01"
 # recent.year <- as.numeric(format(Sys.Date(),"%Y"))
 # station <- 'BaSoil2009'
-# run.year <- 2009:2020
+# run.year <- 2020
 ##############################################################################
 
 stations <- c('BaSoil1998', 'BaSoil2009', 'BaSoil2017', 'BaMet1998', 'BaMet2009',

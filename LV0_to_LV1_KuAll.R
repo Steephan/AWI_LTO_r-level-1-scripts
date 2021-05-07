@@ -17,26 +17,26 @@
 ##
 #############################################################################
 ##  to run this script seperat, you have to uncomment the next 10 lines!
-if (.Platform$OS.type == "windows") {
-  path<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
-  maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-  p.1<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
-  p.1maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-
-  source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
-}else{
-  path<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
-  maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-  p.1<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
-  p.1maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-
-  source("/sparc/LTO/R_database/database_R/settings/db_func.R")
-}
+# if (.Platform$OS.type == "windows") {
+#   path<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
+#   maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
+#   p.1<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
+#   p.1maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
+# 
+#   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
+# }else{
+#   path<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
+#   maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
+#   p.1<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
+#   p.1maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
+# 
+#   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
+# }
 ############################################################################# 
-require(zoo)
-origin="1970-01-01"
-
-aktuell<-as.numeric(format(Sys.Date(),"%Y"))
+# require(zoo)
+# origin="1970-01-01"
+# 
+# aktuell<-as.numeric(format(Sys.Date(),"%Y"))
 
 # station <- 'KuQ12013'
 # years <- 2013:2018 # years of existing data!!
@@ -47,14 +47,14 @@ aktuell<-as.numeric(format(Sys.Date(),"%Y"))
 # station <- 'KuLucky12013'
 # years <- 2013:2014
 
- station <- 'KuLucky2013'
- years <- 2013
+ # station <- 'KuLucky2013'
+ # years <- 2013
 
 ################################################
 #
 # # years for processinig data!!
 #
-run.year <- years #years
+# run.year <- years #years
 #run.year <- 2018
 
 ################################################

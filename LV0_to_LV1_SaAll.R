@@ -1,6 +1,6 @@
-#############################################################################
+###............................................................................
 ##
-##   Level0 to Level1
+##   Level0 to Level1 ----
 ##
 ##   filter and flags for each variable
 ##
@@ -12,14 +12,15 @@
 ##   last check: 2020-01-29
 ##   checked by: christian.lehr@awi.de
 ##
-#############################################################################
+###............................................................................
 ##
 ## open issues:
 ##
 ##
-#############################################################################
+###............................................................................
 ##
 ##  last modifications:
+##  2021-05-06 SL adapted to refresh app
 ##  2021-03-25 SL new git path
 ##  2020-10-30 CL implement new way of choosing station, years and run.year
 ##  2020-10-29 CL replaced t.year with year_i
@@ -36,32 +37,32 @@
 ##  2018-10-09: changed flag funktions in db_filter_II.R for dirt/snow cover of radiation sensor [PSc]
 ##  2019-05-21: add SaSnow2012
 ##
-##############################################################################
+###............................................................................
 ##
 ## Comments:
 ##
-#############################################################################
+###............................................................................
 # to run this script separately, you have to uncomment the next 10 lines!
-rm(list = ls())
-if (.Platform$OS.type == "windows") {
-  p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
-  p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-  
-  source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
-} else {
-  p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-  p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-  
-  source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
-}
-#############################################################################
+# rm(list = ls())
+# if (.Platform$OS.type == "windows") {
+#   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
+#   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+# 
+#   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+# } else {
+#   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+# 
+#   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+# }
+###............................................................................
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
 require(zoo)
 origin <- "1970-01-01"
 recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-station <- 'SaSnow2012'
-run.year <- 2012:2020
-##############################################################################
+# station <- 'SaMet2002'
+# run.year <- 2021
+###............................................................................
 
 stations <- c('SaSoil1998', 'SaSoil2002', 'SaSoil2012', 'SaMet1998', 'SaMet2002',
               'SaSnow2012', 'SaSnow2016', 'SaHole2006', 'SaHole2010', 'SaHole2018',
@@ -74,22 +75,22 @@ list.years <- list(1998:2002, 2002:recent.year, 2012:recent.year, 1998:2002, 200
 years <- list.years[[which(stations == station)]]
 
 
-################################################
+###............................................................................
 #
 # choose faster option without peakdetection
 # 1 for yes, 0 for no
 
 # please run "SaSnow2012" without peak detection
 # !!!no peak.detection for SaPond2014 -> gradient to low
-mit.peak.detection <- 0
+mit.peak.detection <- 1
 
 
-#####################
-#####################
+###............................................................................
+###............................................................................
 ##################### don't change anything below !!!!!!!!!!!!!!!!!!!!!!!!
-#####################
-#####################
-#####################
+###............................................................................
+###............................................................................
+###............................................................................
 
 #year_i <- run.year <- 2002
 for (year_i in run.year) {
@@ -213,12 +214,12 @@ for (year_i in run.year) {
   # get all column names
   cols <- colnames(lv1.data)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## FILTER for LEVEL 1
-  ##==============================================================================
+  ## FILTER for LEVEL 1 ----
+  ###............................................................................
   ##
-  ## flag == 1    (no data)
+  ## flag == 1    (no data) ----
   ##
 
 ############
@@ -226,7 +227,7 @@ for (year_i in run.year) {
   # Snow depth sensor no data value changes some times between 1.4 and 1.5
   i <- which(cats == 'Dsn')
 
-############
+  ###............................................................................
 
   m <- (ncol(lv1.data) - 1) / 2
   for (i in 1:m) {
@@ -237,9 +238,9 @@ for (year_i in run.year) {
   rm(i, m)
 
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 2     (System error)
+  ## flag == 2     (System error) ----
   ##
   tmpflag <- lv1.data
   db.filter.2 <- db.filter[db.filter$flag == "2", ]
@@ -256,9 +257,9 @@ for (year_i in run.year) {
   tmpflag <- add.systemerror(tmpflag, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 2)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 3    (Maintenance)
+  ## flag == 3    (Maintenance) ----
   ##
   tmpflag <- lv1.data
   if (nrow(db.maint) > 0) {
@@ -270,16 +271,16 @@ for (year_i in run.year) {
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 3)
   }
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 4     (Physical limits)
+  ## flag == 4     (Physical limits) ----
   ##
   tmpflag <- physical.limits.sa(lv1.data, col.cat)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 4)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 5    (Gradient)
+  ## flag == 5    (Gradient) ----
   ##
 
  # if (run.year < 2019) {
@@ -289,9 +290,9 @@ for (year_i in run.year) {
     }
  # }
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 6    (Plausibility)
+  ## flag == 6    (Plausibility) ----
   ##
   tmpflag <- lv1.data
   db.filter.6 <- db.filter[db.filter$flag == "6", ]
@@ -309,9 +310,9 @@ for (year_i in run.year) {
   tmpflag <- add.plausibility(lv1.data, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 6)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 7    (Decreased accuracy)
+  ## flag == 7    (Decreased accuracy) ----
   ##
   tmpflag <- lv1.data
   db.filter.7 <- db.filter[db.filter$flag == "7", ]
@@ -329,13 +330,13 @@ for (year_i in run.year) {
   tmpflag <- detect.T.degradation(lv1.data, col.cats, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 7)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## flag == 8    (Snow covered)
+  ## flag == 8    (Snow covered) ----
   ##
   # tmpflag <- frozen.water.table(lv1.data, col.cats, time.res, year_i)
   # lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
-  #rm(tmpflag)
+  # rm(tmpflag)
 
   tmpflag <- detect.snow.cover(lv1.data, col.cats, time.res)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
@@ -358,31 +359,31 @@ for (year_i in run.year) {
   tmpflag <- add.plausibility(lv1.data, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## Soil moisture computation following Roth
+  ## Soil moisture computation following Roth ----
   ##
 
   if (station %in% c("SaSoil2002", "SaSoil2012")) {
     # path for threshold table for calculation of volumetric water content (vwc)
-    path.input <- paste(path$w[path$n == "LV2.p"], "Samoylov/VWC/threshold_", station, "_", sep = "")
+    path.input <- paste(p.1$w[p.1$n == "LV2.p"], "Samoylov/VWC/threshold_", station, "_", sep = "")
     # tab.vwc_calc: table with column names of soil temperature (Ts), dielectricity (E2), porosity (phi) and vwc of the first year (theta_tot_prior) for the the calculation of vwc
-    tab.vwc_calc <- read.table(file = paste(path$w[path$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""), header = TRUE, sep = ",", dec = ".", stringsAsFactors = FALSE)
+    tab.vwc_calc <- read.table(file = paste(p.1$w[p.1$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""), header = TRUE, sep = ",", dec = ".", stringsAsFactors = FALSE)
     # mw.width: width of moving window to calculate vwc
     mw.width <- time.res
     lv1.data <- compute.vwc(lv1.data, col.cat, station, years, mw.width, path.input, tab.vwc_calc)
   }
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## Inheritance of flags
+  ## Inheritance of flags ----
   ## PART A
 
-  ###########
+  ###............................................................................
   # For the calculated variables, keep the flags of the variables used in the calculation.
   # Because the default flag is 100, the function min can be used for this purpose.
   # The "good data" flag 100 is changed to 0 in the next section.
-  ###########
+  ###............................................................................
 
   # a) SwNet, LwNet and Albedo inherit the flags of SwIn, SwOut, LwIn and LwOut
   if (station == "SaMet2002") {
@@ -394,9 +395,9 @@ for (year_i in run.year) {
     lv1.data$Albedo_fl <- apply(lv1.data[, c("Albedo_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
   }
 
-  ##==============================================================================
+  ###............................................................................
   ##
-  ## Save the data with flags and as noflag version
+  ## Save the data with flags and as noflag version ----
   ##
 
   # remove extra periods from previous and next years
@@ -418,19 +419,19 @@ for (year_i in run.year) {
 
   Iflag <- which(grepl('_fl', colnames(lv1.data)))
 
-  ########################
-  # Inheritance of flags
+  ###............................................................................
+  # Inheritance of flags ----
   # PART B
   if (station == "SaMet2002") {
-    ########################
-    ########################
+    ###............................................................................
+    ###............................................................................
     # in Version 2 RadNet will be changed analogue to the above radiation parameters in PART A to the minimum of all non-zero flags and moved there
-    ########################
+    ###............................................................................
     # analogue to Pangaea data set
     # use the maximum flag of all radiation flags for the RadNet flag
     lv1.data$RadNet_fl <- apply(lv1.data[, c("SwIn_fl", "SwOut_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = max)
   }
-  ########################
+  ###............................................................................
 
   # create noflag dataset where all flagged data is set to 'NA'
   lv1.data.noflag <- lv1.data
@@ -444,7 +445,7 @@ for (year_i in run.year) {
   # make flag columns character columns to avoid printing many digits
   lv1.data[, Iflag] <- sapply(lv1.data[,  Iflag],  as.character)
 
-  # write files
+  # write files ----
   write.table(x = lv1.data,
               file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
@@ -452,7 +453,7 @@ for (year_i in run.year) {
               file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_noflag.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
 
-  ###############################################################################################################################
+  ###............................................................................
   log.peaks(station, year_i, mit.peak.detection)
   cat("#\n# level1 ", station, ": ", year_i, "without problems!\n#\n")
 }

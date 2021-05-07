@@ -17,33 +17,33 @@
 ##
 #############################################################################
 # to run this script separately, you have to uncomment the next 10 lines!
-rm(list = ls())
-if (.Platform$OS.type ==   "windows") {
-  path <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-  maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-  p.1 <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-  p.1maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-
-  source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
-} else {
-  path <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-  maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-  p.1 <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-  p.1maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-
-  source("/sparc/LTO/R_database/database_R/settings/db_func.R")
-}
+# rm(list = ls())
+# if (.Platform$OS.type ==   "windows") {
+#   path <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
+#   maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+#   p.1 <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
+#   p.1maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+# 
+#   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
+# } else {
+#   path <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+#   p.1 <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   p.1maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+# 
+#   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
+# }
 #############################################################################
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
-require(zoo)
-origin <- "1970-01-01"
-recent.year <- as.numeric(format(Sys.Date(), "%Y"))
-
-station <- 'TVCSoil2016'
-years <- 2016:recent.year # years of existing data!!
-run.year <- years
-#run.year <- 2018
-
+# require(zoo)
+# origin <- "1970-01-01"
+# recent.year <- as.numeric(format(Sys.Date(), "%Y"))
+# 
+# station <- 'TVCSoil2016'
+# years <- 2016:recent.year # years of existing data!!
+# run.year <- years
+# #run.year <- 2018
+# 
 ################################################
 #
 # choose faster option without peakdetection
