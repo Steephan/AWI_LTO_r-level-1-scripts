@@ -1,50 +1,49 @@
-#############################################################################
+###..........................................................................
 ##
-##   Level0 to Level1
+##   Level0 to Level1 ----
 ##
 ##   filter and flags for each variable
 ##
 ##   by: stephan.lange@awi.de -2200
 ##
 ##  last modifications:
+##  
+##  2021-05-10 SL adapted to refresh and git structure, content management
+##                check for file exist after current run.year
 ##  2020-10-06 CL new condition: flag 5 is only applied for years before 2019
 ##  2020-09-16 CL argument "time.res" removed from function detect.peaks
 ##  2020-08-31 CL table vwc_calc_columns_TSoil+E2.csv with parameters Ts, E2, phi and theta_tot_prior for the vwc calculation introduced
-#############################################################################
+###..........................................................................
 ##
 ##
 ##
 ##
-#############################################################################
+###..........................................................................
 # to run this script separately, you have to uncomment the next 10 lines!
 # rm(list = ls())
-# if (.Platform$OS.type ==   "windows") {
-#   path <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-#   maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#   p.1 <- read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt", sep = "\t", header = T)
-#   p.1maint <- read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+# if (.Platform$OS.type == "windows") {
+#   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
+#   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
 # 
-#   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
+#   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # } else {
-#   path <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-#   maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
-#   p.1 <- read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-#   p.1maint <- read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt", sep = "\t", header = T)
+#   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
 # 
-#   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
+#   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # }
-#############################################################################
+###..........................................................................
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
 # require(zoo)
 # origin <- "1970-01-01"
-# recent.year <- as.numeric(format(Sys.Date(), "%Y"))
-# 
-# station <- 'TVCSoil2016'
-# years <- 2016:recent.year # years of existing data!!
-# run.year <- years
-# #run.year <- 2018
-# 
-################################################
+# recent.year <- as.numeric(format(Sys.Date(),"%Y"))
+# station <- 'BaSoil2009'
+# run.year <- 2020
+###..........................................................................
+stations <- c('TVCSoil2016')
+list.years <- list(2016:recent.year)
+years <- list.years[[which(stations == station)]]
+###..........................................................................
 #
 # choose faster option without peakdetection
 # 1 for yes, 0 for no
@@ -52,12 +51,6 @@
 mit.peak.detection <- 1
 
 
-#####################
-#####################
-##################### don't change anything below
-#####################
-#####################
-#####################
 
 for (t.year in run.year) {
 
@@ -101,9 +94,16 @@ for (t.year in run.year) {
 
   lv0.data <- rbind(tmp, lv0.data)
   if (t.year < years[length(years)]) {
+    if(file.exists(file.name.after)){
     tmp <- read.table(file.name.after, sep = ",", dec = ".", header = T)
     tmp[, 1] <- format(as.POSIXct(tmp[, 1], origin = options()$origin, tz = 'UTC', format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
     tmp <- tmp[1:time.extra, ]
+    }else{
+      tmp <- lv0.data[(time.extra + 1):(time.extra * 2), ]
+      tmp[, 2:ncol(tmp)] <- NA
+      tmp[, 1] <- format((as.POSIXct(tmp[, 1]) + difftime(strptime('1999-01-01', '%Y-%m-%d'), strptime('1998-01-01', '%Y-%m-%d'))), format = '%Y-%m-%d %H:%M')
+      
+    }
   } else {
     tmp <- lv0.data[(time.extra + 1):(time.extra * 2), ]
     tmp[, 2:ncol(tmp)] <- NA
@@ -179,12 +179,12 @@ for (t.year in run.year) {
   # get all column names
   cols <- colnames(lv1.data)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## FILTER for LEVEL 1
-  ## ==============================================================================
+  ## FILTER for LEVEL 1 ----
+  ###..........................................................................
   ##
-  ## flag ==  1    (no data)
+  ## flag ==  1    (no data) ----
   ##
   # Snow depth sensor no data value changes some times between 1.4 and 1.5
   i <- which(cats == 'Dsn')
@@ -197,9 +197,9 @@ for (t.year in run.year) {
   rm(i, m)
 
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  2     (System error)
+  ## flag ==  2     (System error) ----
   ##
   tmpflag <- lv1.data
   db.filter.2 <- db.filter[db.filter$flag == "2", ]
@@ -216,9 +216,9 @@ for (t.year in run.year) {
   tmpflag <- add.systemerror(tmpflag, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 2)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  3    (Maintenance)
+  ## flag ==  3    (Maintenance) ----
   ##
   tmpflag <- lv1.data
   if (nrow(db.maint) > 0) {
@@ -231,16 +231,16 @@ for (t.year in run.year) {
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 3)
   }
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  4     (Physical limits)
+  ## flag ==  4     (Physical limits) ----
   ##
   tmpflag <- physical.limits.sa(lv1.data, col.cat)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 4)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  5    (Gradient)
+  ## flag ==  5    (Gradient) ----
   ##
 
   if (run.year < 2019) {
@@ -250,9 +250,9 @@ for (t.year in run.year) {
     }
   }
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  6    (Plausibility)
+  ## flag ==  6    (Plausibility) ----
   ##
   tmpflag <- lv1.data
   db.filter.6 <- db.filter[db.filter$flag == "6", ]
@@ -270,9 +270,9 @@ for (t.year in run.year) {
   tmpflag <- add.plausibility(lv1.data, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 6)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  7    (Decreased accuracy)
+  ## flag ==  7    (Decreased accuracy) ----
   ##
   tmpflag <- lv1.data
   db.filter.7 <- db.filter[db.filter$flag == "7", ]
@@ -290,9 +290,9 @@ for (t.year in run.year) {
   tmpflag <- detect.T.degradation(lv1.data, col.cats, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 7)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag ==  8    (Snow covered)
+  ## flag ==  8    (Snow covered) ----
   ##
   # tmpflag <- frozen.water.table(lv1.data, col.cats, time.res, t.year)
   # lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
@@ -319,24 +319,24 @@ for (t.year in run.year) {
   tmpflag <- add.plausibility(lv1.data, station)
   lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## Soil moisture computation following Roth
+  ## Soil moisture computation following Roth ----
   ##
   #
   if (station %in% c("TVCSoil2016")) {
     # path for threshold table for calculation of volumetric water content (vwc)
-    path.input <- paste(path$w[path$n == "LV2.p"], "TVC/VWC/threshold_", station, "_", sep = "")
+    path.input <- paste(p.1$w[p.1$n == "LV2.p"], "TVC/VWC/threshold_", station, "_", sep = "")
     # tab.vwc_calc: table with column names of soil temperature (Ts), dielectricity (E2), porosity (phi) and vwc of the first year (theta_tot_prior) for the the calculation of vwc
-    tab.vwc_calc <- read.table(file = paste(path$w[path$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""), header = TRUE, sep = ",", dec = ".", stringsAsFactors = FALSE)
+    tab.vwc_calc <- read.table(file = paste(p.1$w[p.1$n == "settings.p"], "vwc_calc_columns_TSoil+E2.csv", sep = ""), header = TRUE, sep = ",", dec = ".", stringsAsFactors = FALSE)
     # mw.width: width of moving window to calculate vwc
     mw.width <- time.res
     lv1.data <- compute.vwc(lv1.data, col.cat, station, years, mw.width, path.input, tab.vwc_calc)
   }
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## Save the data with flags and as noflag version
+  ## Save the data with flags and as noflag version ----
   ##
 
   # remove extra periods from previous and next years
@@ -376,7 +376,7 @@ for (t.year in run.year) {
   write.table(lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))], paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", t.year, "_lv1_noflag.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
 
-  ###############################################################################################################################
+  ###..........................................................................
   log.peaks(station, t.year, mit.peak.detection)
   cat("#\n# level1 ", station, ": ", t.year, "without problems!\n#\n")
 }

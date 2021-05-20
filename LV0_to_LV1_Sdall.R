@@ -1,66 +1,62 @@
-#############################################################################
+###..........................................................................
 ##
-##   SaHole2010        Level0 to Level1
+##   SaHole2010        Level0 to Level1 ----
 ##
 ##  
 ##
 ##   by: Stephan.Lange@awi.de and Niko.bornemann@awi.de
-##   last modified: 2019/11/12
+##   last modified: 201911/12
 ##
-#############################################################################
+###..........................................................................
+## ATTENTION: ----
+###   peak.detection by default off!!!
+##..........................................................................
+## modifications: ----
 ##
-##   - new physical limits implementaion
+##   2021-05-12 SL adapt to new git, runner app and content management
+##   2019-11-12 SL new physical limits implementaion
 ##
 ##
 ##
-#############################################################################
+###..........................................................................
 #  to run this script seperat, you have to uncomment the next 15 lines!
 # if (.Platform$OS.type == "windows") {
-#   path<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
-#   maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
 #   p.1<-read.table("N:/sparc/LTO/R_database/database_R/settings/path_windoof.txt",sep="\t",header=T)
 #   p.1maint<-read.table("N:/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-# 
 #   source("N:/sparc/LTO/R_database/database_R/settings/db_func.R")
 # }else{
 #   path<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
-#   maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-#   p.1<-read.table("/sparc/LTO/R_database/database_R/settings/path_linux.txt",sep="\t",header=T, fileEncoding="UTF-8")
-#   p.1maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)
-# 
+#   maint<-read.table("/sparc/LTO/R_database/database_R/settings/maintance.txt",sep="\t",header=T)#
 #   source("/sparc/LTO/R_database/database_R/settings/db_func.R")
 # }
-#############################################################################
+###..........................................................................
 
 
 # origin="1970-01-01"
 
-#############################################################################
-# station <- "SdHole2009"
-# years   <- 2009:2019 # do not change me!!!!!!
-#############################################################################
+###..........................................................................
+stations <- "SdHole2009"
+years   <- 2009:2019 # do not change me!!!!!!
+###..........................................................................
 
-#############################################################################
-## choose years fro processing
+###..........................................................................
+## choose years for processing
 # run.year <-  years
-#run.year <-  2018
-#############################################################################
+# run.year <-  2018
+###..........................................................................
 
 
-################################################
+###..........................................................................
 #
 # choose faster option without peakdetection
 # 1 for yes, 0 for no
 #
-mit.peak.detection <- 1
-################################################
+mit.peak.detection <- 0
+###..........................................................................
 
 
 
 for(t.year in run.year){
-  
-  
-  #cat(t.year)
   file.name.main <- paste0(p.1$w[p.1$n=="LV0.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv0.dat")
   file.name.before <- paste0(p.1$w[p.1$n=="LV0.p"],station,"/00_full_dataset/",station,"_",t.year-1,"_lv0.dat")
   file.name.after <- paste0(p.1$w[p.1$n=="LV0.p"],station,"/00_full_dataset/",station,"_",t.year+1,"_lv0.dat")
@@ -171,12 +167,12 @@ for(t.year in run.year){
   # get all column names
   cols <- colnames(lv1.data)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## FILTER for LEVEL 1
-  ## ==============================================================================
+  ## FILTER for LEVEL 1 ----
+  ###..........................................................................
   ##
-  ## flag == 1    (no data)
+  ## flag == 1    (no data) ----
   ##
   
   m <- (ncol(lv1.data)-1)/2
@@ -188,9 +184,9 @@ for(t.year in run.year){
   rm(i,m)
   
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 2     (System error)
+  ## flag == 2     (System error) ----
   ##
   tmpflag <- lv1.data
   db.filter.2 <- db.filter[db.filter$flag=="2",]
@@ -207,9 +203,9 @@ for(t.year in run.year){
   tmpflag <- add.systemerror(tmpflag,station)
   lv1.data <- update.flags(lv1.data,tmpflag,Iflag,2)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 3    (Maintenance)
+  ## flag == 3    (Maintenance) ----
   ##
   tmpflag <- lv1.data
   if(nrow(db.maint) > 0){
@@ -221,16 +217,16 @@ for(t.year in run.year){
     }
     lv1.data <- update.flags(lv1.data,tmpflag,Iflag,3)
   }
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 4     (Physical limits)
+  ## flag == 4     (Physical limits) ----
   ##
   tmpflag <- physical.limits.sd(lv1.data,col.cat)
   lv1.data <- update.flags(lv1.data,tmpflag,Iflag,4)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 5    (Gradient)
+  ## flag == 5    (Gradient) ----
   ##
   ##  at the moment too sensitive!!!!! (2017.11.01 SL)
   ##
@@ -239,9 +235,9 @@ for(t.year in run.year){
     lv1.data <- update.flags(lv1.data,tmpflag,Iflag,5)
   }
 
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 6    (Plausibility)
+  ## flag == 6    (Plausibility) ----
   ##
   tmpflag <- lv1.data
   db.filter.6 <- db.filter[db.filter$flag=="6",]
@@ -259,9 +255,9 @@ for(t.year in run.year){
   tmpflag <- add.plausibility(lv1.data,station)
   lv1.data <- update.flags(lv1.data,tmpflag,Iflag,6)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 7    (Decreased accuracy)
+  ## flag == 7    (Decreased accuracy) ----
   ##
   tmpflag <- lv1.data
   db.filter.7 <- db.filter[db.filter$flag=="7",]
@@ -279,17 +275,17 @@ for(t.year in run.year){
   tmpflag <- detect.T.degradation(lv1.data,col.cats,station)
   lv1.data <- update.flags(lv1.data,tmpflag,Iflag,7)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## flag == 8    (Snow covered)
+  ## flag == 8    (Snow covered) ----
   ##
   tmpflag <- detect.snow.cover(lv1.data,col.cats,time.res)
   lv1.data <- update.flags(lv1.data,tmpflag,Iflag,8)
   rm(tmpflag)
   
-  ## ==============================================================================
+  ###..........................................................................
   ##
-  ## Save the data with flags and as noflag version
+  ## Save the data with flags and as noflag version ----
   ##
   
   # remove extra periods from previous and next years
@@ -316,11 +312,11 @@ for(t.year in run.year){
   # make flag columns character columns to avoid printing many digits
   lv1.data[, Iflag] <- sapply(lv1.data[, Iflag], as.character)
   
-  # write files
+  # write files ----
   write.table(lv1.data                              ,paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv1.dat"),quote = F,dec=".",sep=",",row.names=F)
   write.table(lv1.data.noflag[,c(1,seq( 2,(ncol(lv1.data)-1),by=2))],paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv1_noflag.dat"),quote = F,dec=".",sep=",",row.names=F)
   
-  ###############################################################################################################################
+  ###..........................................................................
   log.peaks(station,t.year,mit.peak.detection)
   cat("#\n# level1 ",station,": ",t.year,"without problems!\n#\n")
   
