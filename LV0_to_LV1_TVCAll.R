@@ -37,12 +37,13 @@
 # require(zoo)
 # origin <- "1970-01-01"
 # recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-# station <- 'BaSoil2009'
-# run.year <- 2020
+# station <- 'TVCHole22015'
+
 ###..........................................................................
-stations <- c('TVCSoil2016')
-list.years <- list(2016:recent.year)
-years <- list.years[[which(stations == station)]]
+stations <- c('TVCSoil2016','TVCHole12015','TVCHole22015')
+lisyear_is <- list(2016:recent.year,2015:recent.year,2015:recent.year)
+years <- lisyear_is[[which(stations == station)]]
+# run.year <- years
 ###..........................................................................
 #
 # choose faster option without peakdetection
@@ -52,21 +53,21 @@ mit.peak.detection <- 1
 
 
 
-for (t.year in run.year) {
+for (year_i in run.year) {
 
-  #cat(t.year)
-  file.name.main <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", t.year, "_lv0.dat")
-  file.name.before <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", t.year - 1, "_lv0.dat")
-  file.name.after <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", t.year + 1, "_lv0.dat")
+  #cat(year_i)
+  file.name.main <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv0.dat")
+  file.name.before <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i - 1, "_lv0.dat")
+  file.name.after <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i + 1, "_lv0.dat")
 
   # load manual filters
-  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/TVC_filter_", t.year, ".dat"), sep = ",", dec = ".", header = T)
+  db.filter <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/TVC_filter_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.filter <- db.filter[db.filter$dataset == station, ]
   db.filter[, 1] <- format(as.POSIXct(db.filter[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
   db.filter[, 2] <- format(as.POSIXct(db.filter[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
 
   # load maintanance filters
-  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/TVC_maintenance_", t.year, ".dat"), sep = ",", dec = ".", header = T)
+  db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "LV1.p"]), "Filter/TVC_maintenance_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
   db.maint[, 1] <- format(as.POSIXct(db.maint[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
   db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
@@ -82,7 +83,7 @@ for (t.year in run.year) {
   # add the last week of the previous year and the first week of the next year if available
   # needed for moving average operations
   time.extra <- time.res * 7
-  if (t.year > years[1]) {
+  if (year_i > years[1]) {
     tmp <- read.table(file.name.before, sep = ",", dec = ".", header = T)
     tmp[, 1] <- format(as.POSIXct(tmp[, 1], origin = options()$origin, tz = 'UTC', format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
     tmp <- tmp[(nrow(tmp) - time.extra + 1):nrow(tmp), ]
@@ -93,7 +94,7 @@ for (t.year in run.year) {
   }
 
   lv0.data <- rbind(tmp, lv0.data)
-  if (t.year < years[length(years)]) {
+  if (year_i < years[length(years)]) {
     if(file.exists(file.name.after)){
     tmp <- read.table(file.name.after, sep = ",", dec = ".", header = T)
     tmp[, 1] <- format(as.POSIXct(tmp[, 1], origin = options()$origin, tz = 'UTC', format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
@@ -294,7 +295,7 @@ for (t.year in run.year) {
   ##
   ## flag ==  8    (Snow covered) ----
   ##
-  # tmpflag <- frozen.water.table(lv1.data, col.cats, time.res, t.year)
+  # tmpflag <- frozen.water.table(lv1.data, col.cats, time.res, year_i)
   # lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 8)
   #rm(tmpflag)
 
@@ -371,13 +372,13 @@ for (t.year in run.year) {
   lv1.data[, Iflag] <- sapply(lv1.data[, Iflag], as.character)
 
   # write files
-  write.table(lv1.data, paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", t.year, "_lv1.dat"),
+  write.table(lv1.data, paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
-  write.table(lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))], paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", t.year, "_lv1_noflag.dat"),
+  write.table(lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))], paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_noflag.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
 
   ###..........................................................................
-  log.peaks(station, t.year, mit.peak.detection)
-  cat("#\n# level1 ", station, ": ", t.year, "without problems!\n#\n")
+  log.peaks(station, year_i, mit.peak.detection)
+  cat("#\n# level1 ", station, ": ", year_i, "without problems!\n#\n")
 }
 
