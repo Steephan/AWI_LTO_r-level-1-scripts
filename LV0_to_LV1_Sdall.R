@@ -62,13 +62,13 @@ for(t.year in run.year){
   file.name.after <- paste0(p.1$w[p.1$n=="LV0.p"],station,"/00_full_dataset/",station,"_",t.year+1,"_lv0.dat")
   
   # load manual filters
-  db.filter<-read.table(paste0(paste0(p.1$w[p.1$n=="LV1.p"]),"Filter/Sd_filter_",t.year,".dat"),sep=",",dec=".",header=T)
+  db.filter<-read.table(paste0(paste0(p.1$w[p.1$n=="LV1.p"]),"filter.files/Sd_filter_",t.year,".dat"),sep=",",dec=".",header=T)
   db.filter<-db.filter[db.filter$dataset==station,]
   db.filter[,1]<-format(as.POSIXct(db.filter[,1],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
   db.filter[,2]<-format(as.POSIXct(db.filter[,2],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
   
   # load maintanance filters
-  db.maint<-read.table(paste0(paste0(p.1$w[p.1$n=="LV1.p"]),"Filter/Sa_maintenance_",t.year,".dat"),sep=",",dec=".",header=T)
+  db.maint<-read.table(paste0(paste0(p.1$w[p.1$n=="LV1.p"]),"maintenance.files/Sa_maintenance_",t.year,".dat"),sep=",",dec=".",header=T)
   db.maint<-db.maint[db.maint$dataset==station,]
   db.maint[,1]<-format(as.POSIXct(db.maint[,1],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
   db.maint[,2]<-format(as.POSIXct(db.maint[,2],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
