@@ -20,6 +20,7 @@
 ###............................................................................
 ##
 ##  last modifications:
+##  2021-08-16 SL inheritate humidity sensors at SaMet2002
 ##  2021-05-06 SL adapted to refresh app
 ##  2021-03-25 SL new git path
 ##  2020-10-30 CL implement new way of choosing station, years and run.year
@@ -47,12 +48,12 @@
 # if (.Platform$OS.type == "windows") {
 #   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
 #   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-#   
+# 
 #   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # } else {
 #   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
 #   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-#   
+# 
 #   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
 # }
 ###............................................................................
@@ -60,8 +61,8 @@
 require(zoo)
 origin <- "1970-01-01"
 recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-# station <- 'SaPrec2019'
-# run.year <- 2019:2021
+# station <- 'SaMet2002'
+# run.year <- 2019
 ###............................................................................
 
 stations <- c('SaSoil1998', 'SaSoil2002', 'SaSoil2012', 'SaMet1998', 'SaMet2002','SaPrec2019',
@@ -396,11 +397,14 @@ for (year_i in run.year) {
   # a) SwNet, LwNet and Albedo inherit the flags of SwIn, SwOut, LwIn and LwOut
   if (station == "SaMet2002") {
     # SwNet
-    lv1.data$SwNet_fl <- apply(lv1.data[, c("SwNet_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
+    lv1.data$SwNet_fl  <- apply(lv1.data[, c("SwNet_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
     # LwNet
-    lv1.data$LwNet_fl <- apply(lv1.data[, c("LwNet_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = min)
+    lv1.data$LwNet_fl  <- apply(lv1.data[, c("LwNet_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = min)
     # Albedo
     lv1.data$Albedo_fl <- apply(lv1.data[, c("Albedo_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
+    # Humidity
+    lv1.data$RH_200_fl <- apply(lv1.data[, c("RH_200_fl", "Tair_a_200_fl")], 1, FUN = min)
+    lv1.data$RH_50_fl  <- apply(lv1.data[, c("RH_50_fl", "Tair_a_50_fl")], 1, FUN = min)
   }
   
   ###............................................................................
