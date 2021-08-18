@@ -10,9 +10,10 @@
 ###..........................................................................
 ##
 ## last modification:
-##  2021-05-19 SL adapted to git and runner app
-##  2018-06-04: add read out of manual flagged snow cover of sensors (Tair_50) [PSc]
-##  2018-10-09: changed flag funktions in db_filter_II.R for dirt/snow cover of radiation sensor [PSc]
+## 2021-08-18 SL rename noflag data to final data
+## 2021-05-19 SL adapted to git and runner app
+## 2018-06-04 PSc add read out of manual flagged snow cover of sensors (Tair_50)
+## 2018-10-09 PSc changed flag funktions in db_filter_II.R for dirt/snow cover of radiation sensor
 ## 
 ##
 ##
@@ -368,7 +369,7 @@ for(year_i in run.year){
   
   # write files
   write.table(lv1.data                              ,paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",year_i,"_lv1.dat"),quote = F,dec=".",sep=",",row.names=F)
-  write.table(lv1.data.noflag[,c(1,seq( 2,(ncol(lv1.data)-1),by=2))],paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",year_i,"_lv1_noflag.dat"),quote = F,dec=".",sep=",",row.names=F)
+  write.table(lv1.data.noflag[,c(1,seq( 2,(ncol(lv1.data)-1),by=2))],paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",year_i,"_lv1_final.dat"),quote = F,dec=".",sep=",",row.names=F)
   
   ###..........................................................................
   log.peaks(station,year_i,mit.peak.detection)

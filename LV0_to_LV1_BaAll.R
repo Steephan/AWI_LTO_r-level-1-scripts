@@ -17,7 +17,8 @@
 ###..........................................................................
 ##
 ## last modification:
-##  2021-05-10 SL adapted to refresh and git structure, content management
+## 2021-08-18 SL rename noflag data to final data
+## 2021-05-10 SL adapted to refresh and git structure, content management
 ## 2021-04-01 SL add new station BaHole2021, end of station BaHole2015
 ## 2020-10-29 CL replaced t.year with year_i
 ## 2020-10-06 CL new condition: flag 5 is only applied for years before 2019
@@ -519,7 +520,7 @@ for (year_i in run.year) {
               file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
   write.table(x = lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))],
-              file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_noflag.dat"),
+              file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_final.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
   
   ###..........................................................................

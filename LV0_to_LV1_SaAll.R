@@ -20,23 +20,24 @@
 ###............................................................................
 ##
 ##  last modifications:
-##  2021-08-16 SL inheritate humidity sensors at SaMet2002
-##  2021-05-06 SL adapted to refresh app
-##  2021-03-25 SL new git path
-##  2020-10-30 CL implement new way of choosing station, years and run.year
-##  2020-10-29 CL replaced t.year with year_i
-##  2020-10-06 CL new condition: flag 5 is only applied for years before 2019
-##  2020-09-16 CL argument "time.res" removed from function detect.peaks
-##  2020-08-31 CL table vwc_calc_columns_TSoil+E2.csv with parameters Ts, E2, phi and theta_tot_prior for the vwc calculation introduced
-##  2020-07-29 CL add SaHole2018
-##  2020-07-28 CL flagging of "RH50" and "RH200" with flag 6 in dataset "SaMet2002" for all air temperature values
+## 2021-08-18 SL rename noflag data to final data
+## 2021-08-16 SL inheritate humidity sensors at SaMet2002
+## 2021-05-06 SL adapted to refresh app
+## 2021-03-25 SL new git path
+## 2020-10-30 CL implement new way of choosing station, years and run.year
+## 2020-10-29 CL replaced t.year with year_i
+## 2020-10-06 CL new condition: flag 5 is only applied for years before 2019
+## 2020-09-16 CL argument "time.res" removed from function detect.peaks
+## 2020-08-31 CL table vwc_calc_columns_TSoil+E2.csv with parameters Ts, E2, phi and theta_tot_prior for the vwc calculation introduced
+## 2020-07-29 CL add SaHole2018
+## 2020-07-28 CL flagging of "RH50" and "RH200" with flag 6 in dataset "SaMet2002" for all air temperature values
 #                 of the respective height with flag 4 ("TAir 50", respectively "TAir200") moved to db_filter_II.R
-##  2020-07-02 CL variables and categories "NetRad" and "radnet" changed to "RadNet" for consistency with the naming convention of the wiki, the level 0 data and BaMet data
-##  2020-07-02 CL inheritance of flags: "SwNet", "LwNet", "Albedo" inherit from "SwIn", "SwOut", "LwIn" and "LwOut"
+## 2020-07-02 CL variables and categories "NetRad" and "radnet" changed to "RadNet" for consistency with the naming convention of the wiki, the level 0 data and BaMet data
+## 2020-07-02 CL inheritance of flags: "SwNet", "LwNet", "Albedo" inherit from "SwIn", "SwOut", "LwIn" and "LwOut"
 ##               ==> because SwNet, LwNet and Albedo are calculated from SwIn, SwOut, LwIn and LwOut
-##  2018-06-04: add read out of manual flagged snow cover of sensors (Tair_50) [PSc]
-##  2018-10-09: changed flag funktions in db_filter_II.R for dirt/snow cover of radiation sensor [PSc]
-##  2019-05-21: add SaSnow2012
+## 2019-05-21 PSc add SaSnow2012
+## 2018-10-09 PSc changed flag funktions in db_filter_II.R for dirt/snow cover of radiation sensor 
+## 2018-06-04 PSc add read out of manual flagged snow cover of sensors (Tair_50) 
 ##
 ###............................................................................
 ##
@@ -173,6 +174,7 @@ for (year_i in run.year) {
                    grepl('TableFlag', colnames(lv0.data)) |
                    grepl('dist', colnames(lv0.data)) |
                    grepl('raw', colnames(lv0.data)) |
+                   grepl('WT', colnames(lv0.data)) |
                    grepl('sq', colnames(lv0.data)) |
                    grepl('Tsurf_cor', colnames(lv0.data)) |
                    grepl('prec_sum', colnames(lv0.data)) |
@@ -195,7 +197,7 @@ for (year_i in run.year) {
   # Define data categories based on column names
   cats <- c('Tair', 'prec', 'RH', 'Dsn', 'SwIn', 'SwOut', 'LwIn', 'LwOut', 'RadNet', #'radnet', 'NetRad',
             'windv', 'winddeg', 'windsddeg',
-            'Ts', 'Tw', 'vwc', 'cond', 'E2', 'E2sn', 'G', 'SwNet', 'LwNet', 'Albedo', 'distcor', 'WT', 'WL')
+            'Ts', 'Tw', 'vwc', 'cond', 'E2', 'E2sn', 'G', 'SwNet', 'LwNet', 'Albedo', 'distcor', 'WL')
   
   # Retreive columns in the data for each category
   col.cat <- as.data.frame(setNames(replicate(length(cats), numeric(100), simplify = F), cats))
@@ -396,12 +398,11 @@ for (year_i in run.year) {
   
   # a) SwNet, LwNet and Albedo inherit the flags of SwIn, SwOut, LwIn and LwOut
   if (station == "SaMet2002") {
-    # SwNet
+    # Radiation
     lv1.data$SwNet_fl  <- apply(lv1.data[, c("SwNet_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
-    # LwNet
     lv1.data$LwNet_fl  <- apply(lv1.data[, c("LwNet_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = min)
-    # Albedo
     lv1.data$Albedo_fl <- apply(lv1.data[, c("Albedo_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
+    lv1.data$RadNet_fl <- apply(lv1.data[, c("SwIn_fl", "SwOut_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = max)
     # Humidity
     lv1.data$RH_200_fl <- apply(lv1.data[, c("RH_200_fl", "Tair_a_200_fl")], 1, FUN = min)
     lv1.data$RH_50_fl  <- apply(lv1.data[, c("RH_50_fl", "Tair_a_50_fl")], 1, FUN = min)
@@ -431,19 +432,6 @@ for (year_i in run.year) {
   
   Iflag <- which(grepl('_fl', colnames(lv1.data)))
   
-  ###............................................................................
-  # Inheritance of flags ----
-  # PART B
-  if (station == "SaMet2002") {
-    ###............................................................................
-    ###............................................................................
-    # in Version 2 RadNet will be changed analogue to the above radiation parameters in PART A to the minimum of all non-zero flags and moved there
-    ###............................................................................
-    # analogue to Pangaea data set
-    # use the maximum flag of all radiation flags for the RadNet flag
-    lv1.data$RadNet_fl <- apply(lv1.data[, c("SwIn_fl", "SwOut_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = max)
-  }
-  ###............................................................................
   
   # create noflag dataset where all flagged data is set to 'NA'
   lv1.data.noflag <- lv1.data
@@ -462,7 +450,7 @@ for (year_i in run.year) {
               file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
   write.table(x = lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))],
-              file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_noflag.dat"),
+              file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_final.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
   
   ###............................................................................

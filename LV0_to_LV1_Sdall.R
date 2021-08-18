@@ -13,8 +13,9 @@
 ##..........................................................................
 ## modifications: ----
 ##
-##   2021-05-12 SL adapt to new git, runner app and content management
-##   2019-11-12 SL new physical limits implementaion
+## 2021-08-18 SL rename noflag data to final data
+## 2021-05-12 SL adapt to new git, runner app and content management
+## 2019-11-12 SL new physical limits implementaion
 ##
 ##
 ##
@@ -314,7 +315,7 @@ for(t.year in run.year){
   
   # write files ----
   write.table(lv1.data                              ,paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv1.dat"),quote = F,dec=".",sep=",",row.names=F)
-  write.table(lv1.data.noflag[,c(1,seq( 2,(ncol(lv1.data)-1),by=2))],paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv1_noflag.dat"),quote = F,dec=".",sep=",",row.names=F)
+  write.table(lv1.data.noflag[,c(1,seq( 2,(ncol(lv1.data)-1),by=2))],paste0(p.1$w[p.1$n=="LV1.p"],station,"/00_full_dataset/",station,"_",t.year,"_lv1_final.dat"),quote = F,dec=".",sep=",",row.names=F)
   
   ###..........................................................................
   log.peaks(station,t.year,mit.peak.detection)

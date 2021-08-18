@@ -8,11 +8,12 @@
 ##
 ##  last modifications:
 ##  
-##  2021-05-10 SL adapted to refresh and git structure, content management
+## 2021-08-18 SL rename noflag data to final data
+## 2021-05-10 SL adapted to refresh and git structure, content management
 ##                check for file exist after current run.year
-##  2020-10-06 CL new condition: flag 5 is only applied for years before 2019
-##  2020-09-16 CL argument "time.res" removed from function detect.peaks
-##  2020-08-31 CL table vwc_calc_columns_TSoil+E2.csv with parameters Ts, E2, phi and theta_tot_prior for the vwc calculation introduced
+## 2020-10-06 CL new condition: flag 5 is only applied for years before 2019
+## 2020-09-16 CL argument "time.res" removed from function detect.peaks
+## 2020-08-31 CL table vwc_calc_columns_TSoil+E2.csv with parameters Ts, E2, phi and theta_tot_prior for the vwc calculation introduced
 ###..........................................................................
 ##
 ##
@@ -374,7 +375,7 @@ for (year_i in run.year) {
   # write files
   write.table(lv1.data, paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
-  write.table(lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))], paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_noflag.dat"),
+  write.table(lv1.data.noflag[, c(1, seq( 2, (ncol(lv1.data) - 1), by = 2))], paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1_final.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)
   
   ###..........................................................................
