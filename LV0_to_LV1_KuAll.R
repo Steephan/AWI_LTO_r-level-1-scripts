@@ -10,6 +10,7 @@
 ###..........................................................................
 ##
 ## last modification:
+## 2021-10-27 SL read more date options of maintenance files
 ## 2021-08-18 SL rename noflag data to final data
 ## 2021-05-19 SL adapted to git and runner app
 ## 2018-06-04 PSc add read out of manual flagged snow cover of sensors (Tair_50)
@@ -89,8 +90,16 @@ for(year_i in run.year){
   # load maintanance filters
   db.maint<-read.table(paste0(paste0(p.1$w[p.1$n=="settings.p"]),"maintenance.files/Ku_maintenance_",year_i,".dat"),sep=",",dec=".",header=T)
   db.maint<-db.maint[db.maint$dataset==station,]
-  db.maint[,1]<-format(as.POSIXct(db.maint[,1],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
-  db.maint[,2]<-format(as.POSIXct(db.maint[,2],origin=origin,tz="UTC",format='%Y-%m-%d %H:%M:%S'),format='%Y-%m-%d %H:%M')
+  if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+  }
   
   # read level 0 data
   lv0.data<-read.table(file.name.main,sep=",",dec=".",header=T)

@@ -20,6 +20,11 @@
 ###............................................................................
 ##
 ##  last modifications:
+## 2021-12-08 IG after SLs last change, disabling peak detection in the header was no longer possible
+##               therefore I disabled it in the code for the following stations: "SaSnow2012", "SaPond2014", "SaCalm2002"
+## 2021-10-27 SL read more date options of maintenance files
+## 2021-10-14 SL inheritate SWE from distraw_2 and rho and SWE
+## 2021-10-07 SL inheritate Dsn from distraw and Dsn
 ## 2021-08-18 SL rename noflag data to final data
 ## 2021-08-16 SL inheritate humidity sensors at SaMet2002
 ## 2021-05-06 SL adapted to refresh app
@@ -59,32 +64,24 @@
 # }
 ###............................................................................
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
-require(zoo)
-origin <- "1970-01-01"
-recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-# station <- 'SaMet2002'
-# run.year <- 2019
+# require(zoo)
+# origin <- "1970-01-01"
+# recent.year <- as.numeric(format(Sys.Date(),"%Y"))
+# station <- 'SaCalm2002'
+# run.year <- 2002:2021
 ###............................................................................
 
 stations <- c('SaSoil1998', 'SaSoil2002', 'SaSoil2012', 'SaMet1998', 'SaMet2002','SaPrec2019',
               'SaSnow2012', 'SaSnow2016', 'SaHole2006', 'SaHole2010', 'SaHole2018',
-              'SdHole2009', 'SaPond2006', 'SaPond2014')
+              'SdHole2009', 'SaPond2006', 'SaPond2014',
+              'SaCalm2002')
 
 list.years <- list(1998:2002, 2002:recent.year, 2012:recent.year, 1998:2002, 2002:recent.year,2019:recent.year,
                    2012:recent.year, 2016:recent.year, 2006:recent.year, 2010:recent.year, 2018:recent.year,
-                   2009:recent.year, 2006:2014, 2014:recent.year)
+                   2009:recent.year, 2006:2014, 2014:recent.year,
+                   2002:recent.year)
 
 years <- list.years[[which(stations == station)]]
-
-
-###............................................................................
-#
-# choose faster option without peakdetection
-# 1 for yes, 0 for no
-
-# please run "SaSnow2012" without peak detection
-# !!!no peak.detection for SaPond2014 -> gradient to low
-mit.peak.detection <- 1
 
 
 ###............................................................................
@@ -94,8 +91,12 @@ mit.peak.detection <- 1
 ###............................................................................
 ###............................................................................
 
-#year_i <- run.year <- 2002
+
 for (year_i in run.year) {
+  # disable peak detection for recent years (all stations)
+  if (year_i < 2019) {mit.peak.detection = 1}else{mit.peak.detection = 0}
+  # disable peak detection for certain stations
+  if (station == "SaSnow2012" || station == "SaPond2014" || station == "SaCalm2002") {mit.peak.detection = 0}
   
   #cat(year_i)
   file.name.main <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv0.dat")
@@ -111,9 +112,17 @@ for (year_i in run.year) {
   # load maintanance filters
   db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "maintenance.files/Sa_maintenance_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
-  db.maint[, 1] <- format(as.POSIXct(db.maint[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
-  db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
-  
+  if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+  }
+
   # read level 0 data
   lv0.data <- read.table(file.name.main, sep = ",", dec = ".", header = T)
   # set time format
@@ -165,6 +174,7 @@ for (year_i in run.year) {
   tmp <- c(which(grepl('RECORD', colnames(lv0.data)) |
                    grepl('Tpan', colnames(lv0.data)) |
                    grepl('Tsen', colnames(lv0.data)) |
+                   grepl('Tair_sd', colnames(lv0.data)) |
                    #grepl('Tring', colnames(lv0.data)) |
                    grepl('Usen', colnames(lv0.data)) |
                    grepl('Ubat', colnames(lv0.data)) |
@@ -172,10 +182,12 @@ for (year_i in run.year) {
                    grepl('U_min', colnames(lv0.data)) |
                    grepl('Bat_V', colnames(lv0.data)) |
                    grepl('TableFlag', colnames(lv0.data)) |
-                   grepl('dist', colnames(lv0.data)) |
-                   grepl('raw', colnames(lv0.data)) |
+                   grepl('QA', colnames(lv0.data)) |
+                   grepl('distcor', colnames(lv0.data)) |
+                   grepl('rawcor', colnames(lv0.data)) |
                    grepl('WT', colnames(lv0.data)) |
                    grepl('sq', colnames(lv0.data)) |
+                   grepl('SQ', colnames(lv0.data)) |
                    grepl('Tsurf_cor', colnames(lv0.data)) |
                    grepl('prec_sum', colnames(lv0.data)) |
                    grepl('prec_bucket', colnames(lv0.data)) |
@@ -197,7 +209,8 @@ for (year_i in run.year) {
   # Define data categories based on column names
   cats <- c('Tair', 'prec', 'RH', 'Dsn', 'SwIn', 'SwOut', 'LwIn', 'LwOut', 'RadNet', #'radnet', 'NetRad',
             'windv', 'winddeg', 'windsddeg',
-            'Ts', 'Tw', 'vwc', 'cond', 'E2', 'E2sn', 'G', 'SwNet', 'LwNet', 'Albedo', 'distcor', 'WL')
+            'Ts', 'Tw', 'vwc', 'cond', 'E2', 'E2sn', 'G', 'SwNet', 'LwNet', 'Albedo', 'distraw', 'WL',
+            'Dal')
   
   # Retreive columns in the data for each category
   col.cat <- as.data.frame(setNames(replicate(length(cats), numeric(100), simplify = F), cats))
@@ -233,7 +246,7 @@ for (year_i in run.year) {
   ## flag == 1    (no data) ----
   ##
   
-  ############
+  ##
   # This part can be removed, it is not used any more....
   # Snow depth sensor no data value changes some times between 1.4 and 1.5
   i <- which(cats == 'Dsn')
@@ -404,8 +417,39 @@ for (year_i in run.year) {
     lv1.data$Albedo_fl <- apply(lv1.data[, c("Albedo_fl", "SwIn_fl", "SwOut_fl")], 1, FUN = min)
     lv1.data$RadNet_fl <- apply(lv1.data[, c("SwIn_fl", "SwOut_fl", "LwIn_fl", "LwOut_fl")], 1, FUN = max)
     # Humidity
-    lv1.data$RH_200_fl <- apply(lv1.data[, c("RH_200_fl", "Tair_a_200_fl")], 1, FUN = min)
+    lv1.data$RH_200_fl <- apply(lv1.data[, c("RH_200_fl","Tair_a_200_fl")], 1, FUN = min)
     lv1.data$RH_50_fl  <- apply(lv1.data[, c("RH_50_fl", "Tair_a_50_fl")], 1, FUN = min)
+  }
+  
+  if (station == "SaSnow2012") {
+    # Snow height from raw distance
+    lv1.data$Dsn_0_fl  <- apply(lv1.data[, c("Dsn_0_fl", "distraw_0_fl")], 1, FUN = min)
+    lv1.data$Dsn_1_fl  <- apply(lv1.data[, c("Dsn_1_fl", "distraw_1_fl")], 1, FUN = min)
+    lv1.data$Dsn_2_fl  <- apply(lv1.data[, c("Dsn_2_fl", "distraw_2_fl")], 1, FUN = min)
+    lv1.data$Dsn_3_fl  <- apply(lv1.data[, c("Dsn_3_fl", "distraw_3_fl")], 1, FUN = min)
+    lv1.data$Dsn_4_fl  <- apply(lv1.data[, c("Dsn_4_fl", "distraw_4_fl")], 1, FUN = min)
+    lv1.data$Dsn_5_fl  <- apply(lv1.data[, c("Dsn_5_fl", "distraw_5_fl")], 1, FUN = min)
+    lv1.data$Dsn_6_fl  <- apply(lv1.data[, c("Dsn_6_fl", "distraw_6_fl")], 1, FUN = min)
+    lv1.data$Dsn_7_fl  <- apply(lv1.data[, c("Dsn_7_fl", "distraw_7_fl")], 1, FUN = min)
+    lv1.data$Dsn_8_fl  <- apply(lv1.data[, c("Dsn_8_fl", "distraw_8_fl")], 1, FUN = min)
+    lv1.data$Dsn_9_fl  <- apply(lv1.data[, c("Dsn_9_fl", "distraw_9_fl")], 1, FUN = min)
+    
+    # SWE from sensor 2
+    lv1.data$SWE_2_fl  <- apply(lv1.data[, c("SWE_2_fl", "rho_2_fl", "distraw_2_fl")], 1, FUN = min)
+    lv1.data$SWE_3_fl  <- apply(lv1.data[, c("SWE_3_fl", "rho_3_fl", "distraw_2_fl")], 1, FUN = min)
+    lv1.data$SWE_4_fl  <- apply(lv1.data[, c("SWE_4_fl", "rho_4_fl", "distraw_2_fl")], 1, FUN = min)
+    
+    
+  }
+  if (station == "SaSnow2016") {
+    # Snow height from raw distance
+    lv1.data$Dsn_fl  <- apply(lv1.data[, c("Dsn_fl", "distraw_fl")], 1, FUN = min)
+    
+  }
+  if (station == "SaSoil2002") {
+    # Snow height from raw distance
+    lv1.data$Dsn_fl  <- apply(lv1.data[, c("Dsn_fl", "distraw_fl")], 1, FUN = min)
+    
   }
   
   ###............................................................................
@@ -445,7 +489,7 @@ for (year_i in run.year) {
   # make flag columns character columns to avoid printing many digits
   lv1.data[, Iflag] <- sapply(lv1.data[,  Iflag],  as.character)
   
-  # write files ----
+  # Write files ----
   write.table(x = lv1.data,
               file = paste0(p.1$w[p.1$n == "LV1.p"], station, "/00_full_dataset/", station, "_", year_i, "_lv1.dat"),
               quote = F, dec = ".", sep = ",", row.names = F)

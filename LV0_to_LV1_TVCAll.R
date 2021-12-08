@@ -8,6 +8,7 @@
 ##
 ##  last modifications:
 ##  
+## 2021-10-27 SL read more date options of maintenance files
 ## 2021-08-18 SL rename noflag data to final data
 ## 2021-05-10 SL adapted to refresh and git structure, content management
 ##                check for file exist after current run.year
@@ -21,30 +22,30 @@
 ##
 ###..........................................................................
 # to run this script separately, you have to uncomment the next 10 lines!
-rm(list = ls())
-if (.Platform$OS.type == "windows") {
-  p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
-  p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-
-  source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
-} else {
-  p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
-  p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
-
-  source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
-}
+# rm(list = ls())
+# if (.Platform$OS.type == "windows") {
+#   p.1 <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_win.txt", sep = "\t", header = T)
+#   p.1maint <- read.table("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+# 
+#   source("N:/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+# } else {
+#   p.1 <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/path_linux.txt", sep = "\t", header = T, fileEncoding = "UTF-8")
+#   p.1maint <- read.table("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/settings/maintenance.files/maintance.txt", sep = "\t", header = T)
+# 
+#   source("/sparc/LTO/R_database/Time_series_preprocessing/required-scripts-and-files/functions/db_func.R")
+# }
 ###..........................................................................
 # to run this script separately, you have to uncomment the next 3 lines and choose station, years and run.year
 require(zoo)
-origin <- "1970-01-01"
-recent.year <- as.numeric(format(Sys.Date(),"%Y"))
-station <- 'TVCeccc'
+# origin <- "1970-01-01"
+# recent.year <- as.numeric(format(Sys.Date(),"%Y"))
+# station <- 'TVCHole22015'
 
 ###..........................................................................
-stations <- c('TVCSoil2016','TVCHole12015','TVCHole22015',"TVCeccc")
-lisyear_is <- list(2016:recent.year,2015:recent.year,2015:recent.year,2015:recent.year)
-years <- lisyear_is[[which(stations == station)]]
-run.year <- years
+# stations <- c('TVCSoil2016','TVCHole12015','TVCHole22015',"TVCeccc")
+# lisyear_is <- list(2016:recent.year,2015:recent.year,2015:recent.year,2015:recent.year)
+# years <- lisyear_is[[which(stations == station)]]
+# run.year <- years
 ###..........................................................................
 #
 # choose faster option without peakdetection
@@ -70,9 +71,16 @@ for (year_i in run.year) {
   # load maintanance filters
   db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "maintenance.files/TVC_maintenance_", year_i, ".dat"), sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
-  db.maint[, 1] <- format(as.POSIXct(db.maint[, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
-  db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
-  
+  if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+  }
   # read level 0 data
   lv0.data <- read.table(file.name.main, sep = ",", dec = ".", header = T)
   # set time format

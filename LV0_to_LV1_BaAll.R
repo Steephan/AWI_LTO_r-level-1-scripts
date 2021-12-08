@@ -17,6 +17,8 @@
 ###..........................................................................
 ##
 ## last modification:
+## 2021-12-02 SL set all peak.detection off since 2019
+## 2021-10-27 SL read more date options of maintenance files
 ## 2021-08-18 SL rename noflag data to final data
 ## 2021-05-10 SL adapted to refresh and git structure, content management
 ## 2021-04-01 SL add new station BaHole2021, end of station BaHole2015
@@ -86,11 +88,14 @@ years <- list.years[[which(stations == station)]]
 # choose faster option without peakdetection
 # 1 for yes, 0 for no
 #
-mit.peak.detection <- 1
+# mit.peak.detection <- 1
+#
+# Attention! no peak.detection since 2019 !!!
 ###..........................................................................
 
 # year_i <- run.year
 for (year_i in run.year) {
+  if (run.year < 2019) {mit.peak.detection = 1}else{mit.peak.detection = 0}
   
   # cat(year_i)
   file.name.main <- paste0(p.1$w[p.1$n == "LV0.p"], station, "/00_full_dataset/", station,"_", year_i, "_lv0.dat")
@@ -108,8 +113,18 @@ for (year_i in run.year) {
   db.maint <- read.table(paste0(paste0(p.1$w[p.1$n == "settings.p"]), "maintenance.files/Ba_maintenance_", year_i, ".dat"),
                          sep = ",", dec = ".", header = T)
   db.maint <- db.maint[db.maint$dataset == station, ]
-  db.maint$from <- format(as.POSIXct(db.maint$from, origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
-  db.maint$to <- format(as.POSIXct(db.maint$to, origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  # db.maint$from <- format(as.POSIXct(db.maint$from, origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  # db.maint$to <- format(as.POSIXct(db.maint$to, origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M:%S'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d %H:%M'), format = '%Y-%m-%d %H:%M')
+  }else if(is.na(format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M'))!=T){
+    db.maint[, 1] <- format(as.POSIXct(db.maint[1, 1], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+    db.maint[, 2] <- format(as.POSIXct(db.maint[, 2], origin = origin, tz = "UTC", format = '%Y-%m-%d'), format = '%Y-%m-%d %H:%M')
+  }
   
   # read level 0 data
   lv0.data <- read.table(file.name.main, sep = ",", dec = ".", header = T)
@@ -324,12 +339,12 @@ for (year_i in run.year) {
   ## flag == 5    (Gradient) ----
   ##
   
-  if (run.year < 2019) {
+  
     if (mit.peak.detection == 1) {
       tmpflag <- detect.peaks(lv1.data, col.cat, station)
       lv1.data <- update.flags(lv1.data, tmpflag, Iflag, 5)
     }
-  }
+  
   ###..........................................................................
   ##
   ## flag == 6    (Plausibility) ----
